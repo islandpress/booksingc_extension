@@ -45,9 +45,8 @@
   var Extension = function (settings) {
     this.settings = settings
     this.useTabs = settings['openTabs']
-    this.mediaTypes = ['audiobook', 'ebook', 'book'].filter(function (elem) {
-      return settings[elem] === true
-    })
+    this.settings['book'] = true
+    this.mediaTypes = ['book']
   }
 
   Extension.prototype = {
@@ -173,6 +172,8 @@
     		this.available = 1
 	    	this.status = 'found'
 	    	this.url = 'https://greencommons.net/resources/' + data.data[i].id
+	    	this.access = data.data[i].attributes['metadata']['access']
+	    	debugger;
 	    	return true;
     	}
     }
@@ -275,28 +276,6 @@
           $('.bfdc-title:eq(0)').after(mediaTypeDiv)
           console.log(`SETUP: added ${mediaType} div`)
         })
-
-        // Insert footer to bottom of plugin box
-        $('div.bfdc-media:last-child').after(
-            `<div class='bfdc-media bfdc-footer'>
-              <a href='https://greencommons.net' target='_blank'>
-                add a book to the Green Commons
-              </a>
-            </div>
-            <div class='bfdc-media bfdc-footer'>
-              <a class='bfdc-options'>
-                options & support
-              </a>
-            </div>`
-        )
-      } else {
-        $('.bfdc-title:eq(0)').after(
-          `<div class='bfdc-media'>
-            <a class='bfdc-options'>
-              click here to set your search preferences
-            </a>
-          </div>`
-        )
       }
       console.log(`SETUP: initialized layout for media settings ${JSON.stringify(this.extension.mediaTypes)}`)
     },
@@ -309,7 +288,7 @@
 
       if (catalog.copies > 0) {
         content = `<a class='bfdc-media bfdc-media-results' target='${target}' href='${url}'>
-                    ${catalog.copies} ${catalog.copies === 1 ? 'copy' : 'copies'} (${catalog.available} available)
+                    Available (access: ${catalog.access})
                   </a>`
       } else {
         let urlText
@@ -318,10 +297,7 @@
         } else {
           urlText = 'view results'
         }
-        content = `${catalog.status} <br> 
-                  <a class='bfdc-media bfdc-media-results' target='${target}' href = '${url}'>
-                    ${urlText}
-                  </a>`
+        content = `${catalog.status}`
       }
 
       $('div#bfdc-' + catalog.mediaType).html(content)
